@@ -6,6 +6,7 @@ on:
       - main
       - development
       - admin-panel
+      - marketing
 
 jobs:
   build_and_deploy:
@@ -27,10 +28,11 @@ jobs:
       - name: Verify Flutter installation
         run: flutter doctor -v
 
-      - name: Build web app
+      - name: Build web app (Flutter branches)
+        if: github.ref != 'refs/heads/marketing'
         run: flutter build web --release
 
-      - name: Deploy to Production (main branch)
+      - name: Deploy to Production (main branch - app.ndt-toolkit.com)
         if: github.ref == 'refs/heads/main'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -59,3 +61,14 @@ jobs:
           projectId: ndt-toolkit
           target: admin
           channelId: live
+
+      - name: Deploy to Marketing (marketing branch - ndt-toolkit.com)
+        if: github.ref == 'refs/heads/marketing'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: ndt-toolkit
+          target: marketing
+          channelId: live
+          entryPoint: '.'

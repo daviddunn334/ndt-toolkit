@@ -5,6 +5,9 @@
   "targets": {
     "ndt-toolkit": {
       "hosting": {
+        "marketing": [
+          "ndt-toolkit-marketing"
+        ],
         "production": [
           "ndt-toolkit"
         ],

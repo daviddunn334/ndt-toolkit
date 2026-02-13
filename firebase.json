@@ -1,6 +1,21 @@
 {
   "hosting": [
     {
+      "target": "marketing",
+      "public": "web_marketing",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
       "target": "production",
       "public": "build/web",
       "ignore": [

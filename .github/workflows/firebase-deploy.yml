@@ -1,33 +1,58 @@
-name: Deploy to Firebase
+name: Deploy to Firebase Hosting
 
 on:
   push:
     branches:
       - main
-      - develop  # Adding develop branch for test environment
+      - development
+      - admin-panel
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
+          flutter-version: '3.24.3'
           channel: 'stable'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Web
-        run: flutter build web
+      - name: Build web app
+        run: flutter build web --release
 
-      - name: Deploy to Firebase
+      - name: Deploy to Production (main branch)
+        if: github.ref == 'refs/heads/main'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTEGRITY_TOOLS }}'
-          projectId: integrity-tools
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'preview' }}  # Use 'preview' channel for non-main branches
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: ndt-toolkit
+          target: production
+          channelId: live
+
+      - name: Deploy to Preview (development branch)
+        if: github.ref == 'refs/heads/development'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: ndt-toolkit
+          target: preview
+          channelId: live
+
+      - name: Deploy to Admin (admin-panel branch)
+        if: github.ref == 'refs/heads/admin-panel'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: ndt-toolkit
+          target: admin
+          channelId: live

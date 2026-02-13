@@ -1,5 +1,21 @@
 {
   "projects": {
     "default": "ndt-toolkit"
-  }
+  },
+  "targets": {
+    "ndt-toolkit": {
+      "hosting": {
+        "production": [
+          "ndt-toolkit"
+        ],
+        "preview": [
+          "ndt-toolkit-preview"
+        ],
+        "admin": [
+          "admin-ndt-toolkit"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

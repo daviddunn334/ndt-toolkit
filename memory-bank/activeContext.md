@@ -2,12 +2,17 @@
 
 ## Current Work Focus
 
-**Status:** Memory Bank Initialization  
-**Date:** February 12, 2026  
-**Branch:** ndt-toolkit (General Market Release)  
+**Status:** Repository Restructure - Multi-Branch Strategy  
+**Date:** February 13, 2026  
+**Repository:** https://github.com/daviddunn334/ndt-toolkit  
 **Version:** 1.0.3+4
 
-This is the **initial memory bank creation**. The project is feature-complete and deployed. The memory bank has been established to provide comprehensive context for future development sessions.
+**New Repository Structure:**
+- `main` branch → Production deployment (ndt-toolkit.com)
+- `development` branch → Testing/Preview channel (ndt-toolkit-preview)
+- `admin-panel` branch → Admin dashboard (admin.ndt-toolkit.com) - *to be created*
+
+The repository has been restructured to support automated deployments and separate admin functionality from the main user-facing app.
 
 ## Recent Changes
 
@@ -55,6 +60,18 @@ This is the **initial memory bank creation**. The project is feature-complete an
 ✅ **Let programmer do all testing** - No automated testing in place  
 ✅ **Never commit without instruction** - Programmer controls git workflow  
 ✅ **Branch-specific Firebase projects** - main (integrity-tools) vs ndt-toolkit (ndt-toolkit)
+
+### Git Workflow (NEW - Feb 13, 2026)
+🚨 **CRITICAL: Always develop in `development` branch** (unless building admin dashboard)  
+✅ **Test in preview channel** before merging to production  
+✅ **Only merge to `main` when explicitly instructed** by programmer  
+✅ **Never auto-merge** or assume changes should go to production  
+✅ **Admin features go on `admin-panel` branch** (separate from main app)
+
+**Branch Strategy:**
+- `development` → Default working branch for all new features
+- `main` → Production only, merge from development when approved
+- `admin-panel` → Admin dashboard (completely separate app)
 
 ### Design Decisions
 ✅ **1200px responsive breakpoint** - Drawer (desktop) vs bottom nav (mobile)  
@@ -229,8 +246,10 @@ AnalyticsService().logEvent('action_name', {
 ## Communication Preferences
 
 ### Workflow Expectations
+- **Always work in `development` branch** for new features (unless building admin dashboard)
 - **Never commit/push** until explicitly instructed
-- **Let programmer test** all changes before deployment
+- **Never merge to `main`** without explicit approval
+- **Let programmer test** all changes in preview channel before production
 - **Ask for clarification** when requirements are ambiguous
 - **Document all changes** in commit messages
 - **Update memory bank** when significant patterns emerge

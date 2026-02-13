@@ -52,8 +52,8 @@ class AppDrawer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
                     'assets/logos/logo_main.png',
-                    width: 120,
-                    height: 120,
+                    width: 140,
+                    height: 140,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -61,20 +61,11 @@ class AppDrawer extends StatelessWidget {
                 if (isLargeScreen) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'Integrity Tools',
-                    style: TextStyle(
-                      color: const Color(0xFFEDF9FF), // Primary text
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
                     'Professional NDT Suite',
                     style: TextStyle(
                       color: const Color(0xFFAEBBC8), // Secondary text
-                      fontSize: 12,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
                       letterSpacing: 0.3,
                     ),
                   ),

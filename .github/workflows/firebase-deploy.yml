@@ -18,11 +18,14 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
           channel: 'stable'
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
+      
+      - name: Verify Flutter installation
+        run: flutter doctor -v
 
       - name: Build web app
         run: flutter build web --release

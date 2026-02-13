@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
-import '../services/user_service.dart';
-import '../screens/admin/admin_main_screen.dart';
 import '../utils/url_helper.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -281,46 +279,6 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pop(context);
                     }
                     UrlHelper.openPrivacyPolicy();
-                  },
-                ),
-                
-                // Admin Dashboard - Only show for admin users
-                StreamBuilder<bool>(
-                  stream: UserService().isCurrentUserAdminStream(),
-                  builder: (context, snapshot) {
-                    final isAdmin = snapshot.data ?? false;
-                    if (!isAdmin) return const SizedBox.shrink();
-                    
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Divider(
-                            height: 1,
-                            color: Colors.white.withOpacity(0.05),
-                          ),
-                        ),
-                        _buildMenuItem(
-                          context,
-                          'Admin Dashboard',
-                          Icons.admin_panel_settings_outlined,
-                          Icons.admin_panel_settings,
-                          -1,
-                          isLargeScreen,
-                          onTap: () {
-                            if (!isLargeScreen) {
-                              Navigator.pop(context);
-                            }
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const AdminMainScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    );
                   },
                 ),
               ],

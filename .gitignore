@@ -113,3 +113,11 @@ flutter/
 # Firebase
 .firebase/
 firebase-debug.log
+
+# Node modules (prevent accidentally committing)
+node_modules/
+**/node_modules/
+
+# Removed/archived folders
+marketing-site/
+calculator_app/

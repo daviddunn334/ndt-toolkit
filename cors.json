@@ -1,9 +1,10 @@
 [
   {
     "origin": [
+      "https://app.ndt-toolkit.com",
+      "https://integrity-tools.web.app",
       "https://integrity-tools--preview-43jamxuv.web.app",
       "https://integrity-tools--preview-03buvqbj.web.app",
-      "https://integrity-tools.web.app",
       "http://localhost:*",
       "http://127.0.0.1:*"
     ],

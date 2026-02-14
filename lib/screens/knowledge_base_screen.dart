@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_header.dart';
+import '../services/analytics_service.dart';
 
 class KnowledgeBaseScreen extends StatefulWidget {
   const KnowledgeBaseScreen({super.key});
@@ -14,6 +15,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> with SingleTi
   late Animation<Offset> _slideAnimation;
   
   final TextEditingController _searchController = TextEditingController();
+  final AnalyticsService _analytics = AnalyticsService();
   String _searchQuery = '';
   
   // New color system
@@ -306,10 +308,13 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> with SingleTi
                                         article['icon'],
                                         article['color'],
                                         article['tags'],
-                                        onTap: () => Navigator.pushNamed(
-                                          context,
-                                          article['route'],
-                                        ),
+                                        onTap: () {
+                                          _analytics.logKnowledgeBaseViewed(article['title'] as String);
+                                          Navigator.pushNamed(
+                                            context,
+                                            article['route'],
+                                          );
+                                        },
                                       ),
                                     );
                                   },

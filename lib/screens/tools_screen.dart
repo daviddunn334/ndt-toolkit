@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/offline_service.dart';
+import '../services/analytics_service.dart';
 import 'beam_geometry_category_screen.dart';
 import 'snells_law_suite_category_screen.dart';
 import 'array_geometry_category_screen.dart';
@@ -24,6 +25,7 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   final OfflineService _offlineService = OfflineService();
+  final AnalyticsService _analytics = AnalyticsService();
   bool _isOnline = true;
   
   // New Dark Color System
@@ -495,6 +497,7 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
   }
 
   void _handleCategoryTap(BuildContext context, int index, Map<String, dynamic> category) {
+    _analytics.logCalculatorUsed(category['title'] as String);
     if (index == 0) {
       // Beam Geometry
       Navigator.push(

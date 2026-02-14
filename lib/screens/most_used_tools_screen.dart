@@ -10,6 +10,7 @@ import '../widgets/offline_indicator.dart';
 import '../services/offline_service.dart';
 import 'corrosion_grid_logger_screen.dart';
 import 'pdf_to_excel_screen.dart';
+import '../services/analytics_service.dart';
 
 class MostUsedToolsScreen extends StatefulWidget {
   const MostUsedToolsScreen({super.key});
@@ -23,6 +24,7 @@ class _MostUsedToolsScreenState extends State<MostUsedToolsScreen> with SingleTi
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   final OfflineService _offlineService = OfflineService();
+  final AnalyticsService _analytics = AnalyticsService();
   bool _isOnline = true;
   
   final List<Map<String, dynamic>> _calculators = [
@@ -242,6 +244,7 @@ class _MostUsedToolsScreenState extends State<MostUsedToolsScreen> with SingleTi
                                 calculator['tags'],
                                 calculator['color'],
                                 () {
+                                  _analytics.logCalculatorUsed(calculator['title'] as String);
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

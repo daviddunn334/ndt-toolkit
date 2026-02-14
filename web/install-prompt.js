@@ -120,7 +120,8 @@ function showInstallBanner() {
       
       // Log analytics event
       if (window.firebase && window.firebase.analytics) {
-        window.firebase.analytics('pwa_install_prompt_action', {
+        const { logEvent } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js');
+        logEvent(window.firebase.analytics, 'pwa_install_prompt_action', {
           action: 'accepted',
           outcome: outcome
         });
@@ -144,16 +145,20 @@ function showInstallBanner() {
     
     // Log analytics event
     if (window.firebase && window.firebase.analytics) {
-      window.firebase.analytics('pwa_install_prompt_action', {
-        action: 'dismissed'
+      import('https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js').then(({ logEvent }) => {
+        logEvent(window.firebase.analytics, 'pwa_install_prompt_action', {
+          action: 'dismissed'
+        });
       });
     }
   });
 
   // Log analytics event for banner shown
   if (window.firebase && window.firebase.analytics) {
-    window.firebase.analytics('pwa_install_prompt_shown', {
-      visit_count: incrementVisitCount()
+    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js').then(({ logEvent }) => {
+      logEvent(window.firebase.analytics, 'pwa_install_prompt_shown', {
+        visit_count: localStorage.getItem('pwa_visit_count') || '1'
+      });
     });
   }
 }
@@ -192,9 +197,11 @@ window.addEventListener('appinstalled', (e) => {
   
   // Log analytics event
   if (window.firebase && window.firebase.analytics) {
-    window.firebase.analytics('pwa_installed', {
-      platform: navigator.platform,
-      user_agent: navigator.userAgent
+    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js').then(({ logEvent }) => {
+      logEvent(window.firebase.analytics, 'pwa_installed', {
+        platform: navigator.platform,
+        user_agent: navigator.userAgent
+      });
     });
   }
   
@@ -209,8 +216,10 @@ if (window.matchMedia('(display-mode: standalone)').matches ||
   
   // Log analytics event on app launch
   if (window.firebase && window.firebase.analytics) {
-    window.firebase.analytics('pwa_launched', {
-      display_mode: 'standalone'
+    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js').then(({ logEvent }) => {
+      logEvent(window.firebase.analytics, 'pwa_launched', {
+        display_mode: 'standalone'
+      });
     });
   }
 }

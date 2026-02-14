@@ -186,8 +186,11 @@ service cloud.firestore {
     match /photo_identifications/{photoId} {
       // Users can read their own photo identifications
       allow read: if request.auth != null && request.auth.uid == resource.data.userId;
-      // Users can create their own photo identifications
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Users can create their own photo identifications with required fields
+      allow create: if request.auth != null && 
+                       request.auth.uid == request.resource.data.userId &&
+                       request.resource.data.keys().hasAll(['userId', 'photoUrl', 'analysisStatus', 'createdAt']) &&
+                       request.resource.data.analysisStatus == 'pending';
       // Users can delete their own photo identifications
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
       // Allow Cloud Function (running as admin service account) to update analysis fields only

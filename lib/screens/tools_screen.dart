@@ -9,6 +9,8 @@ import 'field_productivity_category_screen.dart';
 import 'geometry_math_category_screen.dart';
 import 'materials_metallurgy_category_screen.dart';
 import 'magnetic_particle_category_screen.dart';
+import 'amplitude_db_category_screen.dart';
+import 'reference_hub_screen.dart';
 
 class ToolsScreen extends StatefulWidget {
   const ToolsScreen({super.key});
@@ -525,6 +527,14 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
           builder: (context) => const FocalLawToolsCategoryScreen(),
         ),
       );
+    } else if (index == 5) {
+      // Amplitude / dB Tools
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AmplitudeDbCategoryScreen(),
+        ),
+      );
     } else if (index == 6) {
       // Magnetic Particle
       Navigator.push(
@@ -563,6 +573,14 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
         context,
         MaterialPageRoute(
           builder: (context) => const GeometryMathCategoryScreen(),
+        ),
+      );
+    } else if (index == 11) {
+      // Code & Standard Reference
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ReferenceHubScreen(),
         ),
       );
     } else {

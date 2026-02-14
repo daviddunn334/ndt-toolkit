@@ -21,6 +21,7 @@ import 'screens/ndt_procedures_screen.dart';
 import 'screens/defect_types_screen.dart';
 import 'screens/equipment_guides_screen.dart';
 import 'screens/ut_physics_screen.dart';
+import 'screens/paut_setup_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -136,6 +137,7 @@ class MyApp extends StatelessWidget {
         '/common_formulas': (context) => const CommonFormulasScreen(),
         '/knowledge_base': (context) => const KnowledgeBaseScreen(),
         '/ut_physics': (context) => const UtPhysicsScreen(),
+        '/paut_setup': (context) => const PautSetupScreen(),
         '/field_safety': (context) => const FieldSafetyScreen(),
         '/terminology': (context) => const TerminologyScreen(),
         '/ndt_procedures': (context) => const NDTProceduresScreen(),

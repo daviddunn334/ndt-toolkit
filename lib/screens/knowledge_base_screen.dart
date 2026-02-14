@@ -69,6 +69,14 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> with SingleTi
       'tags': ['Defects', 'Identification', 'Classification'],
       'route': '/defect_types',
     },
+    {
+      'title': 'PAUT Setup',
+      'summary': 'Array basics, steering/focus, coverage, sensitivity, and common pitfalls',
+      'icon': Icons.view_array,
+      'color': _secondaryAccent,
+      'tags': ['PAUT', 'Phased Array', 'Setup', 'Array'],
+      'route': '/paut_setup',
+    },
   ];
 
   @override

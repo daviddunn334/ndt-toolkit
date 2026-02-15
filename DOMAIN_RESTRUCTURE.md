@@ -23,7 +23,7 @@ The NDT Toolkit hosting has been restructured to support a marketing site at the
 
 ## 📂 Repository Structure
 
-### Branches and Their Purposes:
+### Branches in This Repo:
 
 1. **`main`** → Production Flutter App
    - Deploys to: `app.ndt-toolkit.com`
@@ -37,9 +37,12 @@ The NDT Toolkit hosting has been restructured to support a marketing site at the
    - Deploys to: `admin.ndt-toolkit.com`
    - Source: `build/web`
 
-4. **`marketing`** → Marketing Site (NEW)
-   - Deploys to: `ndt-toolkit.com` (root domain)
-   - Source: `web_marketing/`
+### Marketing Site (Separate Repo):
+
+The marketing site has been moved to its own repository:
+- **Repository:** `ndt-toolkit-marketing` (separate repo)
+- **Deploys to:** `ndt-toolkit.com` (root domain)
+- **Note:** Marketing site is no longer maintained in this repository
 
 ---
 
@@ -60,7 +63,6 @@ The NDT Toolkit hosting has been restructured to support a marketing site at the
   "targets": {
     "ndt-toolkit": {
       "hosting": {
-        "marketing": ["ndt-toolkit-marketing"],
         "production": ["ndt-toolkit"],
         "preview": ["ndt-toolkit-preview"],
         "admin": ["admin-ndt-toolkit"]
@@ -70,9 +72,10 @@ The NDT Toolkit hosting has been restructured to support a marketing site at the
 }
 ```
 
+**Note:** Marketing target has been removed from this repo's configuration.
+
 #### `firebase.json`
-- **Marketing target**: Serves from `web_marketing/` folder
-- **Other targets**: Serve from `build/web/` folder (Flutter output)
+- **All targets**: Serve from `build/web/` folder (Flutter output)
 
 ---
 
@@ -87,23 +90,12 @@ When you push to any of these branches, GitHub Actions automatically builds and 
 | `main` | Flutter Web | Production | app.ndt-toolkit.com |
 | `development` | Flutter Web | Preview | preview.ndt-toolkit.com |
 | `admin-panel` | Flutter Web | Admin | admin.ndt-toolkit.com |
-| `marketing` | Static HTML | Marketing | ndt-toolkit.com |
 
-**Note:** The `marketing` branch skips the Flutter build step since it's just static HTML/CSS.
+**Note:** Marketing site is deployed from a separate repository.
 
 ---
 
 ## 📝 How to Update Each Site
-
-### Marketing Site (ndt-toolkit.com):
-```bash
-git checkout marketing
-# Edit files in web_marketing/
-git add .
-git commit -m "Update marketing site"
-git push origin marketing
-# Automatically deploys to ndt-toolkit.com
-```
 
 ### Main App (app.ndt-toolkit.com):
 ```bash
@@ -164,13 +156,6 @@ preview  → ndt-toolkit-preview.web.app.
 
 ## 🔍 Testing Locally
 
-### Marketing Site:
-```bash
-cd web_marketing
-python -m http.server 8000
-# Visit http://localhost:8000
-```
-
 ### Flutter App:
 ```bash
 flutter run -d chrome
@@ -187,7 +172,7 @@ python -m http.server 8000
 The `.github/workflows/firebase-deploy.yml` file handles all deployments:
 
 - **Detects which branch** was pushed
-- **Conditionally builds** Flutter (skips for marketing branch)
+- **Builds Flutter app** for web
 - **Deploys to correct Firebase target** based on branch
 
 ### Secrets Required:
@@ -198,7 +183,7 @@ The `.github/workflows/firebase-deploy.yml` file handles all deployments:
 
 ## ✅ Benefits of This Structure
 
-1. **Marketing Independence**: Update marketing site without touching app code
+1. **Marketing Independence**: Marketing site is maintained in separate repo
 2. **Branch-Based Deployments**: Each branch deploys to its own domain
 3. **Professional URLs**: 
    - Clean root domain for marketing
@@ -208,37 +193,7 @@ The `.github/workflows/firebase-deploy.yml` file handles all deployments:
 
 ---
 
-## 🎨 Customizing the Marketing Site
-
-The marketing site is in the `web_marketing/` folder:
-
-- **`index.html`** - Main landing page
-- **`styles.css`** - Styling
-- Add more pages, images, or assets as needed
-
-When you're ready to design a professional marketing site:
-1. Checkout the `marketing` branch
-2. Edit files in `web_marketing/`
-3. Push to trigger automatic deployment
-
----
-
-## 📞 Links Between Sites
-
-The marketing site includes links to the app:
-```html
-<a href="https://app.ndt-toolkit.com">Launch App</a>
-```
-
-The app can link back to marketing:
-```dart
-// In Flutter app
-const marketingUrl = 'https://ndt-toolkit.com';
-```
-
----
-
-## 🆘 Troubleshooting
+##  Troubleshooting
 
 ### Site not updating after push?
 - Check GitHub Actions tab for deployment status

@@ -8,12 +8,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html;
 import 'package:http/http.dart' as http;
-import 'admin_metrics_service.dart';
 
 class MethodHoursService {
   final CollectionReference _methodHoursCollection =
       FirebaseFirestore.instance.collection('method_hours');
-  final AdminMetricsService _metrics = AdminMetricsService();
 
   // Helper method to normalize date to start of day (no time component)
   DateTime _normalizeDate(DateTime date) {
@@ -187,7 +185,7 @@ class MethodHoursService {
       // Call the Cloud Function to generate the Excel file
       final callable = FirebaseFunctions.instance.httpsCallable('exportMethodHoursToExcel');
       final result = await callable.call({'year': year});
-      await _metrics.incrementFunctionCall(name: 'exportMethodHoursToExcel', success: true);
+      // Note: Metrics tracking moved to admin repo
       
       final data = result.data as Map<String, dynamic>;
       final downloadUrl = data['downloadUrl'] as String;
@@ -228,7 +226,7 @@ class MethodHoursService {
         print('File saved and shared: $filePath');
       }
     } catch (e) {
-      await _metrics.incrementFunctionCall(name: 'exportMethodHoursToExcel', success: false);
+      // Note: Metrics tracking moved to admin repo
       print('Error exporting to Excel: $e');
       print('Stack trace: ${StackTrace.current}');
       rethrow;

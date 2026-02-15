@@ -2,11 +2,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'admin_metrics_service.dart';
 
 class PdfManagementService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final AdminMetricsService _metrics = AdminMetricsService();
 
   /// Get all companies that have procedure folders
   Future<List<String>> getCompanies() async {
@@ -104,7 +102,7 @@ class PdfManagementService {
         );
       }
 
-      await _metrics.incrementStorageUpload(source: 'pdf_upload');
+      // Note: Metrics tracking moved to admin repo
       return true;
     } catch (e) {
       print('Error uploading PDF: $e');

@@ -10,9 +10,6 @@
         ],
         "preview": [
           "ndt-toolkit-preview"
-        ],
-        "admin": [
-          "admin-ndt-toolkit"
         ]
       }
     }

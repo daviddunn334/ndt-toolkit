@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - admin-panel
 
 jobs:
   build_and_deploy:
@@ -48,14 +47,4 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           projectId: ndt-toolkit
           target: preview
-          channelId: live
-
-      - name: Deploy to Admin (admin-panel branch)
-        if: github.ref == 'refs/heads/admin-panel'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: ndt-toolkit
-          target: admin
           channelId: live

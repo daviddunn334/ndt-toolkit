@@ -45,29 +45,6 @@
           "destination": "/index.html"
         }
       ]
-    },
-    {
-      "target": "admin",
-      "public": "build/web",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "/app",
-          "destination": "/app.html"
-        },
-        {
-          "source": "/app/**",
-          "destination": "/app.html"
-        },
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
     }
   ],
   "firestore": {

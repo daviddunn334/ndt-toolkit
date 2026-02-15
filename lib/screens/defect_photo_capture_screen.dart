@@ -15,6 +15,7 @@ class DefectPhotoCaptureScreen extends StatefulWidget {
 }
 
 class _DefectPhotoCaptureScreenState extends State<DefectPhotoCaptureScreen> {
+  static const bool _aiToolsDisabled = true;
   final ImagePicker _picker = ImagePicker();
   final DefectIdentifierService _identifierService = DefectIdentifierService();
   final AnalyticsService _analyticsService = AnalyticsService();
@@ -157,7 +158,9 @@ class _DefectPhotoCaptureScreenState extends State<DefectPhotoCaptureScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFFEDF9FF)),
       ),
-      body: _isProcessing
+      body: _aiToolsDisabled
+          ? _buildDisabledView()
+          : _isProcessing
           ? _buildProcessingView()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -364,6 +367,50 @@ class _DefectPhotoCaptureScreenState extends State<DefectPhotoCaptureScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildDisabledView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8B800).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.lock_outline,
+                color: Color(0xFFF8B800),
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'AI photo identification is temporarily disabled',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFEDF9FF),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'We\'ve paused AI features to prevent unexpected costs.\nPlease check back soon.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFFAEBBC8),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

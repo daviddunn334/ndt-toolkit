@@ -9,23 +9,18 @@ initializeApp({
   storageBucket: "ndt-toolkit.firebasestorage.app",
 });
 
-// Export the defect analysis function
-export {analyzeDefectOnCreate} from "./defect-analysis";
-
-// Export cache invalidation functions
-export {
-  invalidateCacheOnPdfUpload,
-  invalidateCacheOnPdfDelete,
-} from "./cache-invalidation";
-
-// Export defect photo identification function (Firestore trigger)
-export {analyzePhotoIdentificationOnCreate} from "./defect-photo-identification";
-
-// Export defect identifier cache invalidation functions
-export {
-  invalidateDefectIdentifierCacheOnUpload,
-  invalidateDefectIdentifierCacheOnDelete,
-} from "./defect-identifier-cache-invalidation";
+// AI-related functions are intentionally disabled to avoid Vertex AI costs.
+// To re-enable, uncomment the exports below.
+// export {analyzeDefectOnCreate} from "./defect-analysis";
+// export {
+//   invalidateCacheOnPdfUpload,
+//   invalidateCacheOnPdfDelete,
+// } from "./cache-invalidation";
+// export {analyzePhotoIdentificationOnCreate} from "./defect-photo-identification";
+// export {
+//   invalidateDefectIdentifierCacheOnUpload,
+//   invalidateDefectIdentifierCacheOnDelete,
+// } from "./defect-identifier-cache-invalidation";
 
 // Export Method Hours export function
 export {exportMethodHoursToExcel} from "./method-hours-export";

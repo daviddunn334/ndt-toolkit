@@ -13,6 +13,7 @@ class DefectAnalyzerScreen extends StatefulWidget {
 }
 
 class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
+  static const bool _aiToolsDisabled = true;
   final DefectService _defectService = DefectService();
   final DefectTypeService _defectTypeService = DefectTypeService();
   int _defectCount = 0;
@@ -61,6 +62,14 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_aiToolsDisabled) ...[
+              _buildDisabledBanner(
+                title: 'Defect AI Analyzer is temporarily disabled',
+                message:
+                    'AI analysis has been turned off to prevent unexpected costs. We\'ll re-enable it soon.',
+              ),
+              const SizedBox(height: 20),
+            ],
             // Header Card
             Container(
               padding: const EdgeInsets.all(28),
@@ -190,17 +199,19 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
               title: 'Log New Defect',
               subtitle: 'Record a new defect with measurements',
               color: const Color(0xFF6C5BFF),
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LogDefectScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _loadDefectCount();
-                }
-              },
+              onTap: _aiToolsDisabled
+                  ? _showDisabledSnackBar
+                  : () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LogDefectScreen(),
+                        ),
+                      );
+                      if (result == true) {
+                        _loadDefectCount();
+                      }
+                    },
             ),
 
             const SizedBox(height: 16),
@@ -211,14 +222,16 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
               title: 'Defect History',
               subtitle: 'View all previously logged defects',
               color: const Color(0xFF00E5A8),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DefectHistoryScreen(),
-                  ),
-                );
-              },
+              onTap: _aiToolsDisabled
+                  ? _showDisabledSnackBar
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DefectHistoryScreen(),
+                        ),
+                      );
+                    },
             ),
 
             const SizedBox(height: 32),
@@ -271,6 +284,58 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDisabledSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('This AI tool is temporarily disabled.'),
+        backgroundColor: const Color(0xFFF8B800),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Widget _buildDisabledBanner({required String title, required String message}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8B800).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFF8B800).withOpacity(0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.lock_outline, color: Color(0xFFF8B800)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFF8B800),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFFEDF9FF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

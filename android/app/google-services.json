@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "787811700889",
+    "project_number": "415319249838",
     "project_id": "ndt-toolkit",
     "storage_bucket": "ndt-toolkit.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:787811700889:android:e18fd0fc2f31f2e7566808",
+        "mobilesdk_app_id": "1:415319249838:android:ce6aee035ed75dec942e3f",
         "android_client_info": {
-          "package_name": "com.example.calculator_app"
+          "package_name": "com.ndttoolkit"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBL_wZTaDaIT5D1AoY3pbijyGLJumjcG1o"
+          "current_key": "AIzaSyDfLnWg6LCFzWsB76v9NArddOIew_MzmcU"
         }
       ],
       "services": {

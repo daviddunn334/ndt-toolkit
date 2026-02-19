@@ -1,11 +1,11 @@
 import 'dart:typed_data';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 import '../models/report.dart';
+import 'web_download.dart';
 
 class EnhancedPdfService {
   static const PdfColor _primaryColor =
@@ -840,16 +840,7 @@ class EnhancedPdfService {
   /// Downloads the PDF for web platform
   Future<void> downloadPdfWeb(Uint8List pdfBytes, String filename) async {
     if (kIsWeb) {
-      final blob = html.Blob([pdfBytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.document.createElement('a') as html.AnchorElement
-        ..href = url
-        ..style.display = 'none'
-        ..download = filename;
-      html.document.body?.children.add(anchor);
-      anchor.click();
-      html.document.body?.children.remove(anchor);
-      html.Url.revokeObjectUrl(url);
+      downloadBytes(pdfBytes, filename, mimeType: 'application/pdf');
     }
   }
 

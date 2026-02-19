@@ -5,8 +5,9 @@ import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import 'web_download.dart';
 
 class FieldLogService {
   final CollectionReference _fieldLogsCollection =
@@ -287,12 +288,11 @@ class FieldLogService {
       
       if (kIsWeb) {
         // For web, trigger download
-        final blob = html.Blob([bytes], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', 'Method_Hours_$year.xlsx')
-          ..click();
-        html.Url.revokeObjectUrl(url);
+        downloadBytes(
+          Uint8List.fromList(bytes),
+          'Method_Hours_$year.xlsx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
       } else {
         // For mobile/desktop, save and share
         final directory = await getApplicationDocumentsDirectory();

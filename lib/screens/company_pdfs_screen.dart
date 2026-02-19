@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html; // Only used on web
+import '../services/web_download.dart';
 
 class CompanyPdfsScreen extends StatefulWidget {
   final String company;
@@ -80,7 +80,7 @@ class _CompanyPdfsScreenState extends State<CompanyPdfsScreen> {
       if (mounted) {
         if (kIsWeb) {
           // On web, open the PDF in a new tab immediately
-          html.window.open(url, '_blank');
+          openUrl(url);
         } else {
           Navigator.push(
             context,

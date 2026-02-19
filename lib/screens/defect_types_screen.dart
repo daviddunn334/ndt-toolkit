@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import '../services/web_download.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -141,7 +141,7 @@ class DefectTypesScreen extends StatelessWidget {
                               .ref('procedures/defectidentification/$filename');
                           final url = await ref.getDownloadURL();
                           if (kIsWeb) {
-                            html.window.open(url, '_blank');
+                            openUrl(url);
                           } else {
                             if (context.mounted) {
                               Navigator.push(

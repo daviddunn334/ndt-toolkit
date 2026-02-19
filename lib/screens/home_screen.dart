@@ -3,13 +3,9 @@ import '../calculators/abs_es_calculator.dart';
 import '../calculators/pit_depth_calculator.dart';
 import '../calculators/time_clock_calculator.dart';
 import '../calculators/b31g_calculator.dart';
-import '../screens/company_directory.dart';
-import '../theme/app_theme.dart';
+import '../screens/ndt_procedures_screen.dart';
 import '../calculators/soc_eoc_calculator.dart';
 import '../calculators/dent_ovality_calculator.dart';
-import '../widgets/weather_widget.dart';
-import '../widgets/safety_banner.dart';
-import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -211,7 +207,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
                 
                 const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                
+
+                // ── Procedures Promo Card ──────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isLargeScreen ? 32.0 : 24.0,
+                    ),
+                    child: _buildProceduresPromoCard(context),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
                 // Essential Resources
                 SliverToBoxAdapter(
                   child: Padding(
@@ -364,6 +372,138 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 color: const Color(0xFF7F8A96), // Muted text
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProceduresPromoCard(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NDTProceduresScreen(),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: const Color(0xFFF8B800).withOpacity(0.35),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFF8B800).withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF2A313B),
+                const Color(0xFF252C35),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8B800).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: const Color(0xFFF8B800).withOpacity(0.25),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.upload_file_rounded,
+                    size: 30,
+                    color: Color(0xFFF8B800),
+                  ),
+                ),
+                const SizedBox(width: 18),
+                // Text content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // "New Feature" badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8B800).withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFF8B800).withOpacity(0.35),
+                          ),
+                        ),
+                        child: const Text(
+                          '✨  New Feature',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFF8B800),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        'Upload Your Own Procedures',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEDF9FF),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Add your company\'s NDT procedures as PDFs — access them anytime, right in the app.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFFAEBBC8),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      // CTA
+                      Row(
+                        children: [
+                          const Text(
+                            'Get started',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFF8B800),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 15,
+                            color: Color(0xFFF8B800),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

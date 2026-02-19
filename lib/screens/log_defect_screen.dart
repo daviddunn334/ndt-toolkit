@@ -58,7 +58,8 @@ class _LogDefectScreenState extends State<LogDefectScreen> {
   Future<void> _loadClients() async {
     setState(() => _isLoadingClients = true);
     try {
-      final clients = await _pdfManagementService.getCompanies();
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final clients = await _pdfManagementService.getCompanies(userId);
       setState(() {
         _clients = clients;
         _isLoadingClients = false;

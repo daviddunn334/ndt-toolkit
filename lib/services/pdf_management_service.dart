@@ -6,10 +6,13 @@ import 'package:flutter/foundation.dart';
 class PdfManagementService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  /// Get all companies that have procedure folders
-  Future<List<String>> getCompanies() async {
+  /// Base path for a user's procedures: procedures/{userId}
+  String _basePath(String userId) => 'procedures/$userId';
+
+  /// Get all companies that have procedure folders for a specific user
+  Future<List<String>> getCompanies(String userId) async {
     try {
-      final proceduresRef = _storage.ref('procedures');
+      final proceduresRef = _storage.ref(_basePath(userId));
       final result = await proceduresRef.listAll();
 
       return result.prefixes.map((prefix) {
@@ -23,10 +26,11 @@ class PdfManagementService {
     }
   }
 
-  /// Get all PDFs for a specific company
-  Future<List<Map<String, dynamic>>> getPdfsForCompany(String company) async {
+  /// Get all PDFs for a specific company for a specific user
+  Future<List<Map<String, dynamic>>> getPdfsForCompany(
+      String userId, String company) async {
     try {
-      final companyRef = _storage.ref('procedures/$company');
+      final companyRef = _storage.ref('${_basePath(userId)}/$company');
       final result = await companyRef.listAll();
 
       List<Map<String, dynamic>> pdfs = [];
@@ -72,10 +76,11 @@ class PdfManagementService {
     }
   }
 
-  /// Upload a new PDF file
-  Future<bool> uploadPdf(String company, PlatformFile file) async {
+  /// Upload a new PDF file for a specific user
+  Future<bool> uploadPdf(String userId, String company, PlatformFile file) async {
     try {
-      final ref = _storage.ref('procedures/$company/${file.name}');
+      final ref =
+          _storage.ref('${_basePath(userId)}/$company/${file.name}');
 
       if (kIsWeb) {
         // Web upload
@@ -110,10 +115,11 @@ class PdfManagementService {
     }
   }
 
-  /// Delete a PDF file
-  Future<bool> deletePdf(String company, String filename) async {
+  /// Delete a PDF file for a specific user
+  Future<bool> deletePdf(String userId, String company, String filename) async {
     try {
-      final ref = _storage.ref('procedures/$company/$filename');
+      final ref =
+          _storage.ref('${_basePath(userId)}/$company/$filename');
       await ref.delete();
       return true;
     } catch (e) {
@@ -122,15 +128,16 @@ class PdfManagementService {
     }
   }
 
-  /// Replace an existing PDF file
-  Future<bool> replacePdf(
-      String company, String existingFilename, PlatformFile newFile) async {
+  /// Replace an existing PDF file for a specific user
+  Future<bool> replacePdf(String userId, String company, String existingFilename,
+      PlatformFile newFile) async {
     try {
       // Delete the old file first
-      await deletePdf(company, existingFilename);
+      await deletePdf(userId, company, existingFilename);
 
       // Upload the new file with the same name
-      final ref = _storage.ref('procedures/$company/$existingFilename');
+      final ref = _storage
+          .ref('${_basePath(userId)}/$company/$existingFilename');
 
       if (kIsWeb) {
         await ref.putData(
@@ -164,12 +171,14 @@ class PdfManagementService {
     }
   }
 
-  /// Rename a PDF file
-  Future<bool> renamePdf(
-      String company, String oldFilename, String newFilename) async {
+  /// Rename a PDF file for a specific user
+  Future<bool> renamePdf(String userId, String company, String oldFilename,
+      String newFilename) async {
     try {
-      final oldRef = _storage.ref('procedures/$company/$oldFilename');
-      final newRef = _storage.ref('procedures/$company/$newFilename');
+      final oldRef =
+          _storage.ref('${_basePath(userId)}/$company/$oldFilename');
+      final newRef =
+          _storage.ref('${_basePath(userId)}/$company/$newFilename');
 
       // Download the file data
       final data = await oldRef.getData();
@@ -198,11 +207,12 @@ class PdfManagementService {
     }
   }
 
-  /// Create a new company folder
-  Future<bool> createCompanyFolder(String company) async {
+  /// Create a new company folder for a specific user
+  Future<bool> createCompanyFolder(String userId, String company) async {
     try {
       // Create a placeholder file to ensure the folder exists
-      final ref = _storage.ref('procedures/$company/.placeholder');
+      final ref =
+          _storage.ref('${_basePath(userId)}/$company/.placeholder');
       await ref
           .putString('This folder contains procedure documents for $company');
       return true;
@@ -232,10 +242,12 @@ class PdfManagementService {
     return filename.toLowerCase().endsWith('.pdf');
   }
 
-  /// Get download URL for a PDF
-  Future<String> getDownloadUrl(String company, String filename) async {
+  /// Get download URL for a PDF for a specific user
+  Future<String> getDownloadUrl(
+      String userId, String company, String filename) async {
     try {
-      final ref = _storage.ref('procedures/$company/$filename');
+      final ref =
+          _storage.ref('${_basePath(userId)}/$company/$filename');
       return await ref.getDownloadURL();
     } catch (e) {
       print('Error getting download URL: $e');

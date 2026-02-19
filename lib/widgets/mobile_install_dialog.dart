@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import '../services/web_download.dart';
 
 /// Dialog showing platform-specific PWA install instructions for mobile devices
 class MobileInstallDialog extends StatefulWidget {
@@ -9,40 +9,55 @@ class MobileInstallDialog extends StatefulWidget {
   @override
   State<MobileInstallDialog> createState() => _MobileInstallDialogState();
 
-  /// Show the dialog if on mobile and not already installed/dismissed
+  /// Show the dialog - for mobile button clicks or desktop auto-show
   static void showIfNeeded(BuildContext context) {
     if (!kIsWeb) return;
 
     // Check if already dismissed
-    final dismissed = html.window.localStorage['mobile_install_dismissed'];
+    final dismissed = _getLocalStorageValue('mobile_install_dismissed');
     if (dismissed == 'true') return;
 
     // Check if already installed (running in standalone mode)
-    final isStandalone = html.window.matchMedia('(display-mode: standalone)').matches;
+    final isStandalone = _matchesMedia('(display-mode: standalone)');
     if (isStandalone) return;
 
-    // Check if on mobile
-    if (_isMobile()) {
-      // Show after a short delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            builder: (context) => const MobileInstallDialog(),
-          );
-        }
-      });
+    // Show dialog immediately (called from button on mobile or auto on desktop)
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const MobileInstallDialog(),
+      );
     }
   }
 
   static bool _isMobile() {
     if (!kIsWeb) return false;
-    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    final userAgent = _userAgent().toLowerCase();
     return userAgent.contains('mobile') || 
            userAgent.contains('android') || 
            userAgent.contains('iphone') || 
            userAgent.contains('ipad');
+  }
+
+  static String _userAgent() {
+    if (!kIsWeb) return '';
+    return getBrowserUserAgent();
+  }
+
+  static String? _getLocalStorageValue(String key) {
+    if (!kIsWeb) return null;
+    return getLocalStorageValue(key);
+  }
+
+  static void _setLocalStorageValue(String key, String value) {
+    if (!kIsWeb) return;
+    setLocalStorageValue(key, value);
+  }
+
+  static bool _matchesMedia(String query) {
+    if (!kIsWeb) return false;
+    return matchMediaQuery(query);
   }
 }
 
@@ -59,7 +74,7 @@ class _MobileInstallDialogState extends State<MobileInstallDialog> {
   void _detectPlatform() {
     if (!kIsWeb) return;
 
-    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    final userAgent = MobileInstallDialog._userAgent().toLowerCase();
     
     // Detect platform
     if (userAgent.contains('iphone') || userAgent.contains('ipad')) {
@@ -82,7 +97,7 @@ class _MobileInstallDialogState extends State<MobileInstallDialog> {
 
   void _dismiss() {
     if (kIsWeb) {
-      html.window.localStorage['mobile_install_dismissed'] = 'true';
+      MobileInstallDialog._setLocalStorageValue('mobile_install_dismissed', 'true');
     }
     Navigator.of(context).pop();
   }

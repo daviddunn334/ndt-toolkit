@@ -1,18 +1,10 @@
-buildscript {
-    ext.kotlin_version = '1.8.0'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        // START: FlutterFire Configuration
-        classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        // END: FlutterFire Configuration
-        classpath 'com.android.tools.build:gradle:7.2.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+plugins {
+    // Flutter Gradle plugin is provided via settings.gradle includeBuild
+    // so do not specify a version here to avoid classpath conflicts.
+    // START: FlutterFire Configuration
+    id "com.google.gms.google-services" version "4.4.2" apply false
+    id "com.google.firebase.crashlytics" version "3.0.2" apply false
+    // END: FlutterFire Configuration
 }
 
 allprojects {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../utils/url_helper.dart';
+import '../services/pwa_install_service.dart';
+import '../widgets/mobile_install_dialog.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -27,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _showInstallButton = false;
 
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
@@ -47,6 +50,9 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
       curve: Curves.easeOutCubic,
     ));
     _controller.forward();
+
+    // Check if should show install button
+    _showInstallButton = PWAInstallService.canShowInstallButton();
   }
 
   @override
@@ -498,6 +504,12 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                           ),
                   ),
                   
+                  // Install App Button (Mobile Only)
+                  if (_showInstallButton) ...[
+                    const SizedBox(height: 16),
+                    _buildInstallButton(),
+                  ],
+                  
                   const SizedBox(height: 28),
                   
                   // Divider
@@ -790,6 +802,50 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                 fontWeight: FontWeight.w600,
               ),
               child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstallButton() {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xFF6C5BFF).withOpacity(0.08),
+        border: Border.all(
+          color: const Color(0xFF6C5BFF).withOpacity(0.3),
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            MobileInstallDialog.showIfNeeded(context);
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.install_mobile,
+                  size: 20,
+                  color: const Color(0xFF6C5BFF),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Install App',
+                  style: TextStyle(
+                    color: Color(0xFF6C5BFF),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

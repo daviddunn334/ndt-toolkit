@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html show Blob, Url, document, AnchorElement;
+import 'web_download.dart';
 
 class PdfToExcelService {
   /// Picks one or more PDF files from device storage
@@ -319,16 +319,7 @@ class PdfToExcelService {
   Future<void> _downloadFileOnWeb(Uint8List bytes, String fileName) async {
     if (kIsWeb) {
       // Use web-specific download functionality
-      final blob = html.Blob([bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.document.createElement('a') as html.AnchorElement
-        ..href = url
-        ..style.display = 'none'
-        ..download = fileName;
-      html.document.body?.children.add(anchor);
-      anchor.click();
-      html.document.body?.children.remove(anchor);
-      html.Url.revokeObjectUrl(url);
+      downloadBytes(bytes, fileName);
     }
   }
 

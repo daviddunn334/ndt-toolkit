@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import 'web_download.dart';
 import 'package:http/http.dart' as http;
 
 class MethodHoursService {
@@ -205,12 +205,11 @@ class MethodHoursService {
       
       if (kIsWeb) {
         // For web, trigger download
-        final blob = html.Blob([fileBytes], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', fileName)
-          ..click();
-        html.Url.revokeObjectUrl(url);
+        downloadBytes(
+          fileBytes,
+          fileName,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
         print('File download triggered for web');
       } else {
         // For mobile/desktop, save and share

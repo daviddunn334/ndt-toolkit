@@ -185,6 +185,78 @@ class _DefectHistoryScreenState extends State<DefectHistoryScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    // Photo Badge (if photos exist)
+                    if (defect.hasPhotos) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E5A8).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF00E5A8).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.photo_camera,
+                              size: 12,
+                              color: Color(0xFF00E5A8),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${defect.photoCount}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF00E5A8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    // User Severity Badge (if exists)
+                    if (defect.userSeverityRating != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getSeverityColorForUserRating(defect.userSeverityRating).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _getSeverityColorForUserRating(defect.userSeverityRating).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getSeverityIconForUserRating(defect.userSeverityRating),
+                              size: 12,
+                              color: _getSeverityColorForUserRating(defect.userSeverityRating),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              defect.userSeverityRating![0],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: _getSeverityColorForUserRating(defect.userSeverityRating),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     // Status Badge
                     _buildStatusBadge(defect),
                     const SizedBox(width: 8),
@@ -416,6 +488,36 @@ class _DefectHistoryScreenState extends State<DefectHistoryScreen> {
         return Icons.check_circle_rounded;
       default:
         return Icons.help_outline_rounded;
+    }
+  }
+
+  Color _getSeverityColorForUserRating(String? severity) {
+    switch (severity?.toLowerCase()) {
+      case 'critical':
+        return const Color(0xFFFE637E);
+      case 'high':
+        return const Color(0xFFFF9D3D);
+      case 'medium':
+        return const Color(0xFFF8B800);
+      case 'low':
+        return const Color(0xFF00E5A8);
+      default:
+        return const Color(0xFF7F8A96);
+    }
+  }
+
+  IconData _getSeverityIconForUserRating(String? severity) {
+    switch (severity?.toLowerCase()) {
+      case 'critical':
+        return Icons.dangerous;
+      case 'high':
+        return Icons.error;
+      case 'medium':
+        return Icons.warning;
+      case 'low':
+        return Icons.check_circle;
+      default:
+        return Icons.help;
     }
   }
 

@@ -89,146 +89,180 @@ class _ReferenceHubScreenState extends State<ReferenceHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= 1200;
+    
     return Scaffold(
       backgroundColor: _bgMain,
-      appBar: AppBar(
+      appBar: !isDesktop ? AppBar(
         title: const Text('Code & Standard Reference'),
         backgroundColor: const Color(0xFF6C5BFF),
         foregroundColor: Colors.white,
-      ),
+      ) : null,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Desktop Header
+            if (isDesktop)
               Container(
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: _bgCard,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.05),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6C5BFF).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.menu_book_outlined,
-                        size: 32,
-                        color: Color(0xFF6C5BFF),
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: _bgCard,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.05),
+                      width: 1,
                     ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Reference Library',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: _textPrimary,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Quick access to standards, formulas, and field guides',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _textSecondary,
-                            ),
-                          ),
-                        ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Search bar
-              TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-                style: const TextStyle(color: _textPrimary),
-                decoration: InputDecoration(
-                  hintText: 'Search references...',
-                  hintStyle: const TextStyle(color: _textMuted),
-                  prefixIcon: const Icon(Icons.search, color: _textMuted),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: _textMuted),
-                          onPressed: () {
-                            setState(() {
-                              _searchController.clear();
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: const Color(0xFF242A33),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Module grid
-              Expanded(
-                child: _filteredModules.isEmpty
-                    ? Center(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6C5BFF).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color(0xFF6C5BFF).withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.menu_book_outlined,
+                          size: 32,
+                          color: Color(0xFF6C5BFF),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      const Expanded(
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 64,
-                              color: _textMuted.withOpacity(0.5),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No references found',
+                            Text(
+                              'Code & Standard Reference',
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: _textPrimary,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              'Quick access to standards, formulas, and field guides',
+                              style: TextStyle(
+                                fontSize: 14,
                                 color: _textSecondary,
+                                height: 1.4,
                               ),
                             ),
                           ],
                         ),
-                      )
-                    : GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              MediaQuery.of(context).size.width > 900 ? 2 : 1,
-                          childAspectRatio: 2.5,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        itemCount: _filteredModules.length,
-                        itemBuilder: (context, index) {
-                          final module = _filteredModules[index];
-                          return _buildModuleCard(module);
-                        },
                       ),
+                      Container(
+                        width: 4,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF8B800),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search bar
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      style: const TextStyle(color: _textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Search references...',
+                        hintStyle: const TextStyle(color: _textMuted),
+                        prefixIcon: const Icon(Icons.search, color: _textMuted),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, color: _textMuted),
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: const Color(0xFF242A33),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Module grid
+                    Expanded(
+                      child: _filteredModules.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 64,
+                                    color: _textMuted.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'No references found',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: _textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    MediaQuery.of(context).size.width > 900 ? 2 : 1,
+                                childAspectRatio: 2.5,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                              ),
+                              itemCount: _filteredModules.length,
+                              itemBuilder: (context, index) {
+                                final module = _filteredModules[index];
+                                return _buildModuleCard(module);
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

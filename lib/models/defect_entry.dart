@@ -14,6 +14,13 @@ class DefectEntry {
   final DateTime createdAt;
   final DateTime updatedAt;
   
+  // Photo fields
+  final List<String>? photoUrls; // Multiple photos support
+  final Map<String, dynamic>? photoMetadata;
+  
+  // User severity rating (for future AI training)
+  final String? userSeverityRating; // 'Low' | 'Medium' | 'High' | 'Critical'
+  
   // AI Analysis fields
   final String? analysisStatus; // 'pending' | 'analyzing' | 'complete' | 'error'
   final DateTime? analysisCompletedAt;
@@ -40,6 +47,9 @@ class DefectEntry {
     required this.clientName,
     required this.createdAt,
     required this.updatedAt,
+    this.photoUrls,
+    this.photoMetadata,
+    this.userSeverityRating,
     this.analysisStatus,
     this.analysisCompletedAt,
     this.repairRequired,
@@ -67,6 +77,11 @@ class DefectEntry {
       clientName: data['clientName'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate().toUtc(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate().toUtc(),
+      photoUrls: data['photoUrls'] != null 
+          ? List<String>.from(data['photoUrls'] as List)
+          : null,
+      photoMetadata: data['photoMetadata'] as Map<String, dynamic>?,
+      userSeverityRating: data['userSeverityRating'],
       analysisStatus: data['analysisStatus'],
       analysisCompletedAt: data['analysisCompletedAt'] != null
           ? (data['analysisCompletedAt'] as Timestamp).toDate().toUtc()
@@ -94,6 +109,9 @@ class DefectEntry {
       'clientName': clientName,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+      if (photoUrls != null) 'photoUrls': photoUrls,
+      if (photoMetadata != null) 'photoMetadata': photoMetadata,
+      if (userSeverityRating != null) 'userSeverityRating': userSeverityRating,
     };
   }
 
@@ -116,4 +134,10 @@ class DefectEntry {
   
   // Helper to check if analysis has error
   bool get hasAnalysisError => analysisStatus == 'error';
+  
+  // Helper to check if defect has photos
+  bool get hasPhotos => photoUrls != null && photoUrls!.isNotEmpty;
+  
+  // Helper to get photo count
+  int get photoCount => photoUrls?.length ?? 0;
 }

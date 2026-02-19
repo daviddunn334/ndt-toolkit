@@ -224,6 +224,84 @@ class PdfManagementService {
     }
   }
 
+  /// Delete a company folder and all its contents for a specific user
+  Future<bool> deleteCompanyFolder(String userId, String company) async {
+    try {
+      final companyRef = _storage.ref('${_basePath(userId)}/$company');
+      final result = await companyRef.listAll();
+
+      // Delete all files in the folder
+      for (var item in result.items) {
+        await item.delete();
+      }
+
+      // Delete any subfolders (recursive)
+      for (var prefix in result.prefixes) {
+        await _deleteFolder(prefix);
+      }
+
+      return true;
+    } catch (e) {
+      print('Error deleting company folder: $e');
+      return false;
+    }
+  }
+
+  /// Helper method to recursively delete a folder
+  Future<void> _deleteFolder(Reference folderRef) async {
+    final result = await folderRef.listAll();
+
+    // Delete all files
+    for (var item in result.items) {
+      await item.delete();
+    }
+
+    // Recursively delete subfolders
+    for (var prefix in result.prefixes) {
+      await _deleteFolder(prefix);
+    }
+  }
+
+  /// Rename a company folder for a specific user
+  Future<bool> renameCompanyFolder(
+      String userId, String oldCompany, String newCompany) async {
+    try {
+      final oldCompanyRef = _storage.ref('${_basePath(userId)}/$oldCompany');
+      final result = await oldCompanyRef.listAll();
+
+      // Copy all files to new folder
+      for (var item in result.items) {
+        final data = await item.getData();
+        final metadata = await item.getMetadata();
+
+        final newRef =
+            _storage.ref('${_basePath(userId)}/$newCompany/${item.name}');
+
+        await newRef.putData(
+          data!,
+          SettableMetadata(
+            contentType: metadata.contentType,
+            customMetadata: {
+              ...metadata.customMetadata ?? {},
+              'renamedFolderAt': DateTime.now().toIso8601String(),
+              'originalFolder': oldCompany,
+            },
+          ),
+        );
+      }
+
+      // Delete old folder
+      for (var item in result.items) {
+        await item.delete();
+      }
+
+      return true;
+    } catch (e) {
+      print('Error renaming company folder: $e');
+      return false;
+    }
+  }
+
   /// Get file size in human readable format
   String formatFileSize(int? bytes) {
     if (bytes == null) return 'Unknown size';

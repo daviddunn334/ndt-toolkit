@@ -550,10 +550,54 @@ class _NDTProceduresScreenState extends State<NDTProceduresScreen>
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                  color: _primaryAccent,
+                // Action menu
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: _mutedText,
+                    size: 20,
+                  ),
+                  color: _elevatedSurface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'rename') {
+                      _showRenameCompanyDialog(company);
+                    } else if (value == 'delete') {
+                      _showDeleteCompanyDialog(company);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'rename',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 18, color: _primaryAccent),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Rename',
+                            style: TextStyle(color: _primaryText),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete,
+                              size: 18, color: Color(0xFFFE637E)),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: _primaryText),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -561,6 +605,394 @@ class _NDTProceduresScreenState extends State<NDTProceduresScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _showRenameCompanyDialog(String oldCompany) async {
+    final displayName = _formatCompanyName(oldCompany);
+    final TextEditingController controller =
+        TextEditingController(text: displayName);
+    bool isRenaming = false;
+
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: _elevatedSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _primaryAccent.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: _primaryAccent,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text(
+                          'Rename Company',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enter a new name for the company folder.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _mutedText,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: _cardSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: controller,
+                        autofocus: true,
+                        style: const TextStyle(color: _primaryText),
+                        textCapitalization: TextCapitalization.words,
+                        decoration: InputDecoration(
+                          hintText: 'Company name',
+                          hintStyle: TextStyle(color: _mutedText),
+                          prefixIcon: const Icon(
+                            Icons.business,
+                            color: _mutedText,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        onSubmitted: (_) async {
+                          if (!isRenaming) {
+                            setDialogState(() => isRenaming = true);
+                            await _submitRenameCompany(
+                                oldCompany, controller, context);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isRenaming ? null : () => Navigator.pop(context),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: _mutedText),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: isRenaming
+                              ? null
+                              : () async {
+                                  setDialogState(() => isRenaming = true);
+                                  await _submitRenameCompany(
+                                      oldCompany, controller, context);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryAccent,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                _primaryAccent.withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: isRenaming
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.check, size: 18),
+                          label: Text(isRenaming ? 'Renaming...' : 'Rename'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    controller.dispose();
+  }
+
+  Future<void> _submitRenameCompany(String oldCompany,
+      TextEditingController controller, BuildContext dialogContext) async {
+    final newName = controller.text.trim();
+    if (newName.isEmpty) return;
+
+    final newCompany = newName.toLowerCase().replaceAll(' ', '_');
+
+    final success =
+        await _pdfService.renameCompanyFolder(_userId, oldCompany, newCompany);
+
+    if (mounted) {
+      Navigator.pop(dialogContext);
+      if (success) {
+        _refreshCompanies();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Color(0xFF00E5A8)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Company folder renamed successfully!',
+                    style: const TextStyle(color: _primaryText),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: _elevatedSurface,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Failed to rename folder. Please try again.',
+                    style: TextStyle(color: _primaryText),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: _elevatedSurface,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showDeleteCompanyDialog(String company) async {
+    final displayName = _formatCompanyName(company);
+    bool isDeleting = false;
+
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: _elevatedSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFE637E).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.delete,
+                            color: Color(0xFFFE637E),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text(
+                          'Delete Company',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Are you sure you want to delete "$displayName" and all its PDFs?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _mutedText,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This action cannot be undone.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFFFE637E),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isDeleting ? null : () => Navigator.pop(context),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: _mutedText),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: isDeleting
+                              ? null
+                              : () async {
+                                  setDialogState(() => isDeleting = true);
+                                  await _submitDeleteCompany(company, context);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFE637E),
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                Color(0xFFFE637E).withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: isDeleting
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.delete, size: 18),
+                          label: Text(isDeleting ? 'Deleting...' : 'Delete'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitDeleteCompany(
+      String company, BuildContext dialogContext) async {
+    final success = await _pdfService.deleteCompanyFolder(_userId, company);
+
+    if (mounted) {
+      Navigator.pop(dialogContext);
+      if (success) {
+        _refreshCompanies();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Color(0xFF00E5A8)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Company folder deleted successfully!',
+                    style: const TextStyle(color: _primaryText),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: _elevatedSurface,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Failed to delete folder. Please try again.',
+                    style: TextStyle(color: _primaryText),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: _elevatedSurface,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildAddCompanyCard() {

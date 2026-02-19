@@ -29,6 +29,7 @@ export const deleteUserAccount = onCall(
     region: "us-central1",
     timeoutSeconds: 540, // 9 minutes (max allowed)
     memory: "1GiB",
+    cors: true, // Enable CORS for web requests
   },
   async (request) => {
     try {

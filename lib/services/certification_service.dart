@@ -1,90 +1,173 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/certification.dart';
 
 class CertificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'certifications';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Get all certifications for a user
-  Stream<List<Certification>> getUserCertifications(String userId) {
-    return _firestore
-        .collection(_collection)
-        .where('userId', isEqualTo: userId)
-        .orderBy('expiryDate', descending: false)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => Certification.fromFirestore(doc))
-              .toList();
-        });
-  }
-
-  // Add a new certification
-  Future<Certification> addCertification(Certification certification) async {
-    final docRef = await _firestore.collection(_collection).add(
-          certification.toFirestore(),
-        );
-    
-    return certification.copyWith(id: docRef.id);
-  }
-
-  // Update an existing certification
-  Future<void> updateCertification(Certification certification) async {
-    await _firestore
-        .collection(_collection)
-        .doc(certification.id)
-        .update(certification.toFirestore());
-  }
-
-  // Delete a certification
-  Future<void> deleteCertification(String certificationId) async {
-    await _firestore.collection(_collection).doc(certificationId).delete();
-  }
-
-  // Get a single certification by ID
-  Future<Certification?> getCertification(String certificationId) async {
-    final doc = await _firestore.collection(_collection).doc(certificationId).get();
-    
-    if (doc.exists) {
-      return Certification.fromFirestore(doc);
+  /// Get current user's certifications stream
+  /// Sorted by expiration date (soonest first)
+  Stream<List<Certification>> getUserCertifications() {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      return Stream.value([]);
     }
-    
-    return null;
+
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .orderBy('expiresAt', descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Certification.fromFirestore(doc))
+            .toList());
   }
 
-  // Get certifications that are expiring soon (within 90 days)
-  Stream<List<Certification>> getExpiringSoonCertifications(String userId) {
-    final now = DateTime.now();
-    final ninetyDaysFromNow = now.add(const Duration(days: 90));
-    
+  /// Get all active certification types
+  Stream<List<CertificationType>> getCertificationTypes() {
     return _firestore
-        .collection(_collection)
-        .where('userId', isEqualTo: userId)
-        .where('expiryDate', isGreaterThan: Timestamp.fromDate(now))
-        .where('expiryDate', isLessThan: Timestamp.fromDate(ninetyDaysFromNow))
-        .orderBy('expiryDate', descending: false)
+        .collection('certification_types')
+        .where('isActive', isEqualTo: true)
+        .orderBy('name')
         .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => Certification.fromFirestore(doc))
-              .toList();
-        });
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CertificationType.fromFirestore(doc))
+            .toList());
   }
 
-  // Get expired certifications
-  Stream<List<Certification>> getExpiredCertifications(String userId) {
+  /// Add a new certification
+  Future<void> addCertification({
+    required String typeId,
+    required String typeName,
+    required DateTime expiresAt,
+    DateTime? issuedDate,
+    String? notes,
+  }) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final cert = Certification(
+      id: '', // Will be set by Firestore
+      userId: userId,
+      typeId: typeId,
+      typeName: typeName,
+      expiresAt: expiresAt,
+      issuedDate: issuedDate,
+      notes: notes,
+    );
+
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .add(cert.toFirestore());
+  }
+
+  /// Update an existing certification
+  Future<void> updateCertification(String certId, {
+    String? typeId,
+    String? typeName,
+    DateTime? expiresAt,
+    DateTime? issuedDate,
+    String? notes,
+  }) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final updates = <String, dynamic>{
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    if (typeId != null) updates['typeId'] = typeId;
+    if (typeName != null) updates['typeName'] = typeName;
+    if (expiresAt != null) updates['expiresAt'] = Timestamp.fromDate(expiresAt);
+    if (issuedDate != null) {
+      updates['issuedDate'] = Timestamp.fromDate(issuedDate);
+    }
+    if (notes != null) updates['notes'] = notes;
+
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .doc(certId)
+        .update(updates);
+  }
+
+  /// Delete a certification
+  Future<void> deleteCertification(String certId) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .doc(certId)
+        .delete();
+  }
+
+  /// Get the next expiring certification
+  Future<Certification?> getNextExpiring() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      return null;
+    }
+
     final now = DateTime.now();
-    
-    return _firestore
-        .collection(_collection)
-        .where('userId', isEqualTo: userId)
-        .where('expiryDate', isLessThan: Timestamp.fromDate(now))
-        .orderBy('expiryDate', descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => Certification.fromFirestore(doc))
-              .toList();
-        });
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .where('expiresAt', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+        .orderBy('expiresAt', descending: false)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return null;
+    }
+
+    return Certification.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Get count of certifications by status
+  Future<Map<CertificationStatus, int>> getCertificationCounts() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      return {
+        CertificationStatus.valid: 0,
+        CertificationStatus.expiringSoon: 0,
+        CertificationStatus.expired: 0,
+      };
+    }
+
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('certifications')
+        .get();
+
+    final counts = {
+      CertificationStatus.valid: 0,
+      CertificationStatus.expiringSoon: 0,
+      CertificationStatus.expired: 0,
+    };
+
+    for (final doc in snapshot.docs) {
+      final cert = Certification.fromFirestore(doc);
+      final status = cert.getStatus();
+      counts[status] = (counts[status] ?? 0) + 1;
+    }
+
+    return counts;
   }
 }

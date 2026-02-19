@@ -28,6 +28,10 @@ export {exportMethodHoursToExcel} from "./method-hours-export";
 // Export Account Deletion function
 export {deleteUserAccount} from "./account-deletion";
 
+// One-time setup function to populate certification types
+// DELETE THIS EXPORT after running once
+export {populateCertificationTypes} from "./populate-cert-types";
+
 export const processHardnessReport = onRequest({cors: true}, async (req, res) => {
   try {
     const {filePath} = req.body;

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../services/image_service.dart';
+import '../services/certification_service.dart';
 import '../models/user_profile.dart';
+import '../models/certification.dart';
 import '../widgets/app_header.dart';
 import '../widgets/delete_account_dialog.dart';
+import '../widgets/add_certification_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -19,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final ProfileService _profileService = ProfileService();
   final AuthService _authService = AuthService();
   final ImageService _imageService = ImageService();
+  final CertificationService _certService = CertificationService();
   final _displayNameController = TextEditingController();
   final _bioController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -747,6 +752,163 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             ),
                             const SizedBox(height: 24),
 
+                            // Certifications Section
+                            StreamBuilder<List<Certification>>(
+                              stream: _certService.getUserCertifications(),
+                              builder: (context, certSnapshot) {
+                                final certifications = certSnapshot.data ?? [];
+                                
+                                return Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.05),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Header
+                                      Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.secondaryAccent.withOpacity(0.15),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: const Icon(
+                                                Icons.verified,
+                                                color: AppTheme.secondaryAccent,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            const Expanded(
+                                              child: Text(
+                                                'Certifications',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppTheme.textPrimary,
+                                                ),
+                                              ),
+                                            ),
+                                            StreamBuilder<List<CertificationType>>(
+                                              stream: _certService.getCertificationTypes(),
+                                              builder: (context, typesSnapshot) {
+                                                final certTypes = typesSnapshot.data ?? [];
+                                                
+                                                return ElevatedButton.icon(
+                                                  icon: const Icon(Icons.add, size: 18),
+                                                  label: const Text('Add'),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: AppTheme.secondaryAccent,
+                                                    foregroundColor: Colors.white,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(10),
+                                                    ),
+                                                    elevation: 0,
+                                                  ),
+                                                  onPressed: certTypes.isEmpty
+                                                      ? null
+                                                      : () async {
+                                                          final result = await showDialog<bool>(
+                                                            context: context,
+                                                            builder: (context) => AddCertificationDialog(
+                                                              certificationTypes: certTypes,
+                                                            ),
+                                                          );
+                                                          
+                                                          if (result == true && mounted) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              SnackBar(
+                                                                content: const Row(
+                                                                  children: [
+                                                                    Icon(Icons.check_circle, color: AppTheme.secondaryAccent),
+                                                                    SizedBox(width: 12),
+                                                                    Text('Certification added successfully'),
+                                                                  ],
+                                                                ),
+                                                                backgroundColor: AppTheme.surface,
+                                                                behavior: SnackBarBehavior.floating,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.circular(12),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      
+                                      // Next Expiring Summary
+                                      if (certifications.isNotEmpty) ...[
+                                        Divider(height: 1, color: Colors.white.withOpacity(0.05)),
+                                        Padding(
+                                          padding: const EdgeInsets.all(20),
+                                          child: _buildNextExpiringCard(certifications.first),
+                                        ),
+                                      ],
+                                      
+                                      Divider(height: 1, color: Colors.white.withOpacity(0.05)),
+                                      
+                                      // Certifications List
+                                      if (certifications.isEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                                          child: Center(
+                                            child: Column(
+                                              children: [
+                                                Icon(
+                                                  Icons.verified_outlined,
+                                                  size: 48,
+                                                  color: AppTheme.textMuted.withOpacity(0.5),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                const Text(
+                                                  'No certifications added yet',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: AppTheme.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        ListView.separated(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          itemCount: certifications.length,
+                                          separatorBuilder: (context, index) => Divider(
+                                            height: 1,
+                                            color: Colors.white.withOpacity(0.05),
+                                          ),
+                                          itemBuilder: (context, index) {
+                                            final cert = certifications[index];
+                                            return _buildCertificationItem(cert);
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
                             // Settings Section
                             Container(
                               width: double.infinity,
@@ -1341,6 +1503,438 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNextExpiringCard(Certification cert) {
+    final daysRemaining = cert.getDaysRemaining();
+    final status = cert.getStatus();
+    
+    Color statusColor;
+    String statusText;
+    
+    switch (status) {
+      case CertificationStatus.expired:
+        statusColor = AppTheme.accessoryAccent;
+        statusText = 'Expired';
+        break;
+      case CertificationStatus.expiringSoon:
+        statusColor = AppTheme.yellowAccent;
+        statusText = 'Expiring Soon';
+        break;
+      case CertificationStatus.valid:
+        statusColor = AppTheme.secondaryAccent;
+        statusText = 'Valid';
+        break;
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: statusColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.event,
+              color: statusColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Next Expiring',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  cert.typeName,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${DateFormat('MMM d, yyyy').format(cert.expiresAt)} ${daysRemaining >= 0 ? '($daysRemaining days)' : '(${-daysRemaining} days ago)'}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              statusText,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: statusColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationItem(Certification cert) {
+    final status = cert.getStatus();
+    final daysRemaining = cert.getDaysRemaining();
+    
+    Color statusColor;
+    String statusText;
+    IconData statusIcon;
+    
+    switch (status) {
+      case CertificationStatus.expired:
+        statusColor = AppTheme.accessoryAccent;
+        statusText = 'Expired';
+        statusIcon = Icons.cancel;
+        break;
+      case CertificationStatus.expiringSoon:
+        statusColor = AppTheme.yellowAccent;
+        statusText = 'Expiring Soon';
+        statusIcon = Icons.warning;
+        break;
+      case CertificationStatus.valid:
+        statusColor = AppTheme.secondaryAccent;
+        statusText = 'Valid';
+        statusIcon = Icons.check_circle;
+        break;
+    }
+    
+    return InkWell(
+      onTap: () async {
+        // Show edit/delete options
+        final certTypes = await _certService.getCertificationTypes().first;
+        
+        if (!mounted) return;
+        
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: AppTheme.surface,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (context) => Container(
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              border: Border(
+                top: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cert.typeName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildCertActionButton(
+                          icon: Icons.edit,
+                          label: 'Edit',
+                          color: AppTheme.primaryAccent,
+                          onTap: () async {
+                            Navigator.pop(context);
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AddCertificationDialog(
+                                certification: cert,
+                                certificationTypes: certTypes,
+                              ),
+                            );
+                            
+                            if (result == true && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: AppTheme.secondaryAccent),
+                                      SizedBox(width: 12),
+                                      Text('Certification updated successfully'),
+                                    ],
+                                  ),
+                                  backgroundColor: AppTheme.surface,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        _buildCertActionButton(
+                          icon: Icons.delete,
+                          label: 'Delete',
+                          color: AppTheme.accessoryAccent,
+                          onTap: () async {
+                            Navigator.pop(context);
+                            
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: AppTheme.surface,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                title: const Text(
+                                  'Delete Certification',
+                                  style: TextStyle(color: AppTheme.textPrimary),
+                                ),
+                                content: Text(
+                                  'Are you sure you want to delete "${cert.typeName}"?',
+                                  style: const TextStyle(color: AppTheme.textSecondary),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppTheme.accessoryAccent,
+                                    ),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            
+                            if (confirm == true) {
+                              try {
+                                await _certService.deleteCertification(cert.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Row(
+                                        children: [
+                                          Icon(Icons.check_circle, color: AppTheme.secondaryAccent),
+                                          SizedBox(width: 12),
+                                          Text('Certification deleted successfully'),
+                                        ],
+                                      ),
+                                      backgroundColor: AppTheme.surface,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.error, color: AppTheme.accessoryAccent),
+                                          const SizedBox(width: 12),
+                                          Expanded(child: Text('Error: $e')),
+                                        ],
+                                      ),
+                                      backgroundColor: AppTheme.surface,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                statusIcon,
+                color: statusColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cert.typeName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Expires: ${DateFormat('MMM d, yyyy').format(cert.expiresAt)}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  if (cert.notes != null && cert.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      cert.notes!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: statusColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  daysRemaining >= 0
+                      ? '$daysRemaining days'
+                      : '${-daysRemaining} days ago',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCertActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

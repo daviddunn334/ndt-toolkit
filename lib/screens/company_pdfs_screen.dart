@@ -581,10 +581,53 @@ class _CompanyPdfsScreenState extends State<CompanyPdfsScreen>
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.open_in_new_rounded,
-                  size: 18,
-                  color: _primaryAccent,
+                // Action buttons
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: _mutedText,
+                    size: 20,
+                  ),
+                  color: _elevatedSurface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'rename') {
+                      _showRenamePdfDialog(filename);
+                    } else if (value == 'delete') {
+                      _showDeletePdfDialog(filename);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'rename',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 18, color: _primaryAccent),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Rename',
+                            style: TextStyle(color: _primaryText),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 18, color: _accessoryAccent),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: _primaryText),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -592,6 +635,356 @@ class _CompanyPdfsScreenState extends State<CompanyPdfsScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _showRenamePdfDialog(String oldFilename) async {
+    final displayName = oldFilename.toLowerCase().endsWith('.pdf')
+        ? oldFilename.substring(0, oldFilename.length - 4)
+        : oldFilename;
+
+    final TextEditingController controller =
+        TextEditingController(text: displayName);
+    bool isRenaming = false;
+
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: _elevatedSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _primaryAccent.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: _primaryAccent,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text(
+                          'Rename PDF',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enter a new name for the PDF file.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _mutedText,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: _cardSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: controller,
+                        autofocus: true,
+                        style: const TextStyle(color: _primaryText),
+                        decoration: InputDecoration(
+                          hintText: 'PDF name',
+                          hintStyle: TextStyle(color: _mutedText),
+                          prefixIcon: const Icon(
+                            Icons.picture_as_pdf,
+                            color: _mutedText,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        onSubmitted: (_) async {
+                          if (!isRenaming) {
+                            setDialogState(() => isRenaming = true);
+                            await _submitRenamePdf(
+                                oldFilename, controller, context);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isRenaming ? null : () => Navigator.pop(context),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: _mutedText),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: isRenaming
+                              ? null
+                              : () async {
+                                  setDialogState(() => isRenaming = true);
+                                  await _submitRenamePdf(
+                                      oldFilename, controller, context);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryAccent,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                _primaryAccent.withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: isRenaming
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.check, size: 18),
+                          label: Text(isRenaming ? 'Renaming...' : 'Rename'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    controller.dispose();
+  }
+
+  Future<void> _submitRenamePdf(String oldFilename,
+      TextEditingController controller, BuildContext dialogContext) async {
+    final newName = controller.text.trim();
+    if (newName.isEmpty) return;
+
+    // Ensure .pdf extension
+    final newFilename = newName.toLowerCase().endsWith('.pdf')
+        ? newName
+        : '$newName.pdf';
+
+    try {
+      final ref = FirebaseStorage.instance
+          .ref('procedures/${widget.userId}/${widget.company}/$oldFilename');
+      final newRef = FirebaseStorage.instance
+          .ref('procedures/${widget.userId}/${widget.company}/$newFilename');
+
+      // Get the file data and metadata
+      final data = await ref.getData();
+      final metadata = await ref.getMetadata();
+
+      // Upload with new name
+      await newRef.putData(
+        data!,
+        SettableMetadata(
+          contentType: metadata.contentType,
+          customMetadata: {
+            ...metadata.customMetadata ?? {},
+            'renamedAt': DateTime.now().toIso8601String(),
+            'originalName': oldFilename,
+          },
+        ),
+      );
+
+      // Delete the old file
+      await ref.delete();
+
+      if (mounted) {
+        Navigator.pop(dialogContext);
+        _showSuccessSnack('PDF renamed successfully!');
+        _loadPdfFiles();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(dialogContext);
+        _showErrorSnack('Failed to rename PDF. Please try again.');
+      }
+    }
+  }
+
+  Future<void> _showDeletePdfDialog(String filename) async {
+    final displayName = filename.toLowerCase().endsWith('.pdf')
+        ? filename.substring(0, filename.length - 4)
+        : filename;
+
+    bool isDeleting = false;
+
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: _elevatedSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _accessoryAccent.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.delete,
+                            color: _accessoryAccent,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text(
+                          'Delete PDF',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Are you sure you want to delete "$displayName"?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _mutedText,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This action cannot be undone.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _accessoryAccent,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isDeleting ? null : () => Navigator.pop(context),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: _mutedText),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: isDeleting
+                              ? null
+                              : () async {
+                                  setDialogState(() => isDeleting = true);
+                                  await _submitDeletePdf(filename, context);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _accessoryAccent,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                _accessoryAccent.withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: isDeleting
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.delete, size: 18),
+                          label: Text(isDeleting ? 'Deleting...' : 'Delete'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitDeletePdf(
+      String filename, BuildContext dialogContext) async {
+    try {
+      final ref = FirebaseStorage.instance
+          .ref('procedures/${widget.userId}/${widget.company}/$filename');
+      await ref.delete();
+
+      if (mounted) {
+        Navigator.pop(dialogContext);
+        _showSuccessSnack('PDF deleted successfully!');
+        _loadPdfFiles();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(dialogContext);
+        _showErrorSnack('Failed to delete PDF. Please try again.');
+      }
+    }
   }
 }
 

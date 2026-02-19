@@ -8,9 +8,8 @@ import '../theme/app_theme.dart';
 /// 
 /// Flow:
 /// 1. Warning dialog with data checklist
-/// 2. Re-authentication (password confirmation)
-/// 3. Processing with progress indicator
-/// 4. Success message with auto-logout
+/// 2. Processing with progress indicator
+/// 3. Success message with auto-logout
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key});
 
@@ -21,19 +20,12 @@ class DeleteAccountDialog extends StatefulWidget {
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   final AccountDeletionService _deletionService = AccountDeletionService();
   final AuthService _authService = AuthService();
-  final TextEditingController _passwordController = TextEditingController();
 
-  int _currentStep = 0; // 0 = warning, 1 = re-auth, 2 = processing, 3 = success
+  int _currentStep = 0; // 0 = warning, 1 = processing, 2 = success
   bool _understandChecked = false;
   bool _isProcessing = false;
   String? _errorMessage;
   String _progressMessage = '';
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   // Step 0: Warning Dialog
   Widget _buildWarningStep() {
@@ -138,13 +130,8 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             ),
             const SizedBox(width: 12),
             ElevatedButton(
-              onPressed: _understandChecked
-                  ? () {
-                      setState(() {
-                        _currentStep = 1;
-                        _errorMessage = null;
-                      });
-                    }
+              onPressed: _understandChecked && !_isProcessing
+                  ? _handleDeleteAccount
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accessoryAccent,
@@ -156,7 +143,16 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                 ),
                 elevation: 0,
               ),
-              child: const Text('Continue'),
+              child: _isProcessing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('Delete Account'),
             ),
           ],
         ),
@@ -186,131 +182,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     );
   }
 
-  // Step 1: Re-authentication
-  Widget _buildReauthStep() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryAccent.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.lock, color: AppTheme.primaryAccent, size: 24),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Confirm Your Identity',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        const Text(
-          'For security, please enter your password to continue:',
-          style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-        ),
-        const SizedBox(height: 16),
-
-        // Password field
-        TextField(
-          controller: _passwordController,
-          obscureText: true,
-          style: const TextStyle(color: AppTheme.textPrimary),
-          decoration: InputDecoration(
-            labelText: 'Password',
-            labelStyle: const TextStyle(color: AppTheme.textSecondary),
-            prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
-            filled: true,
-            fillColor: AppTheme.surfaceElevated,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primaryAccent, width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.accessoryAccent),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.accessoryAccent, width: 1.5),
-            ),
-            errorText: _errorMessage,
-            errorStyle: const TextStyle(color: AppTheme.accessoryAccent),
-          ),
-          onSubmitted: (_) => _handleReauthenticate(),
-        ),
-        const SizedBox(height: 24),
-
-        // Buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _currentStep = 0;
-                  _errorMessage = null;
-                  _passwordController.clear();
-                });
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.textSecondary,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child: const Text('Back'),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              onPressed: _isProcessing ? null : _handleReauthenticate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accessoryAccent,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppTheme.textMuted,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: _isProcessing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text('Delete Account'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // Step 2: Processing
+  // Step 1: Processing
   Widget _buildProcessingStep() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -346,7 +218,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     );
   }
 
-  // Step 3: Success
+  // Step 2: Success
   Widget _buildSuccessStep() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -388,38 +260,24 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     );
   }
 
-  Future<void> _handleReauthenticate() async {
-    if (_passwordController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter your password';
-      });
-      return;
-    }
-
+  Future<void> _handleDeleteAccount() async {
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
+      _currentStep = 1; // Move to processing screen
+      _progressMessage = 'Deleting your account...';
     });
 
     try {
-      // Step 1: Re-authenticate
-      await _deletionService.reauthenticateUser(_passwordController.text);
-
-      // Step 2: Move to processing screen
-      setState(() {
-        _currentStep = 2;
-        _progressMessage = 'Deleting your account...';
-      });
-
-      // Step 3: Delete account
+      // Delete account
       await _deletionService.deleteCurrentUserAccount();
 
-      // Step 4: Show success
+      // Show success
       setState(() {
-        _currentStep = 3;
+        _currentStep = 2;
       });
 
-      // Step 5: Auto-logout after 3 seconds
+      // Auto-logout after 3 seconds
       await Future.delayed(const Duration(seconds: 3));
 
       // Logout (this will automatically redirect to login screen)
@@ -432,15 +290,20 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     } catch (e) {
       setState(() {
         _isProcessing = false;
-        if (_currentStep == 1) {
-          // Re-auth error
-          _errorMessage = e.toString().replaceAll('Exception: ', '');
-        } else {
-          // Deletion error - show error dialog
-          _currentStep = 1;
-          _errorMessage = 'Deletion failed: ${e.toString().replaceAll('Exception: ', '')}';
-        }
+        _currentStep = 0; // Go back to warning screen
+        _errorMessage = 'Deletion failed: ${e.toString().replaceAll('Exception: ', '')}';
       });
+      
+      // Show error message in a snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: AppTheme.accessoryAccent,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
@@ -468,7 +331,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Title
-                if (_currentStep < 3) ...[
+                if (_currentStep < 2) ...[
                   Row(
                     children: [
                       Container(
@@ -503,8 +366,6 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                 if (_currentStep == 0)
                   _buildWarningStep()
                 else if (_currentStep == 1)
-                  _buildReauthStep()
-                else if (_currentStep == 2)
                   _buildProcessingStep()
                 else
                   _buildSuccessStep(),

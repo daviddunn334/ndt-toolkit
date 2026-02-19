@@ -204,5 +204,27 @@ service cloud.firestore {
       allow update: if request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['analysisStatus', 'analysisCompletedAt', 'matches', 'processingTime', 'errorMessage']);
     }
+
+    // Certification Types - Global admin-curated list
+    match /certification_types/{typeId} {
+      // All authenticated users can read active certification types
+      allow read: if request.auth != null;
+      // Only admins can create, update, delete certification types
+      allow create, update, delete: if request.auth != null && isAdmin();
+    }
+
+    // User Certifications - Per-user subcollection
+    match /users/{userId}/certifications/{certId} {
+      // Users can read their own certifications
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Users can create their own certifications
+      allow create: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       request.resource.data.userId == userId;
+      // Users can update/delete their own certifications
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      // Admins can read all certifications (for admin management)
+      allow read: if request.auth != null && isAdmin();
+    }
   }
 }

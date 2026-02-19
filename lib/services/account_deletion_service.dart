@@ -71,37 +71,4 @@ class AccountDeletionService {
     }
   }
 
-  /// Re-authenticate the user with their password
-  /// Required before account deletion for security
-  Future<bool> reauthenticateUser(String password) async {
-    final user = _auth.currentUser;
-    if (user == null || user.email == null) {
-      throw Exception('No user is currently signed in');
-    }
-
-    try {
-      // Create credential with email and password
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: password,
-      );
-
-      // Re-authenticate
-      await user.reauthenticateWithCredential(credential);
-      return true;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'wrong-password') {
-        throw Exception('Incorrect password. Please try again.');
-      } else if (e.code == 'user-mismatch') {
-        throw Exception('Credential does not match the current user.');
-      } else if (e.code == 'invalid-credential') {
-        throw Exception('Invalid credential. Please try again.');
-      } else {
-        throw Exception('Re-authentication failed: ${e.message}');
-      }
-    } catch (e) {
-      print('Error re-authenticating user: $e');
-      throw Exception('Re-authentication failed. Please try again.');
-    }
-  }
 }

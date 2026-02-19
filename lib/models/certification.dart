@@ -1,150 +1,156 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum CertificationType {
-  asntLevelI,
-  asntLevelII,
-  asntLevelIII,
-  sntTc1a,
-  nas410,
-  api570,
-  api510,
-  api653,
-  awsCwi,
-  cswip,
-  cgsbMtLevelI,
-  cgsbMtLevelII,
-  cgsbUtLevelI,
-  cgsbUtLevelII,
-  cgsbPautLevelI,
-  cgsbPautLevelII,
-}
-
 enum CertificationStatus {
-  active,
+  valid,
   expiringSoon,
   expired,
 }
 
+/// Certification model with flexible type system
+/// Uses typeId to reference certification_types collection
 class Certification {
   final String id;
   final String userId;
-  final CertificationType type;
-  final String level;
-  final String certNumber;
-  final DateTime expiryDate;
-  final DateTime issuedDate;
+  final String typeId; // Reference to certification_types doc
+  final String typeName; // Denormalized for display
+  final DateTime expiresAt;
+  final DateTime? issuedDate;
   final String? notes;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Certification({
     required this.id,
     required this.userId,
-    required this.type,
-    required this.level,
-    required this.certNumber,
-    required this.expiryDate,
-    required this.issuedDate,
+    required this.typeId,
+    required this.typeName,
+    required this.expiresAt,
+    this.issuedDate,
     this.notes,
-  });
+    DateTime? createdAt,
+    this.updatedAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory Certification.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Certification(
       id: doc.id,
       userId: data['userId'] ?? '',
-      type: CertificationType.values.firstWhere(
-        (e) => e.toString() == data['type'],
-        orElse: () => CertificationType.asntLevelII,
-      ),
-      level: data['level'] ?? '',
-      certNumber: data['certNumber'] ?? '',
-      expiryDate: (data['expiryDate'] as Timestamp).toDate(),
-      issuedDate: (data['issuedDate'] as Timestamp).toDate(),
+      typeId: data['typeId'] ?? '',
+      typeName: data['typeName'] ?? '',
+      expiresAt: (data['expiresAt'] as Timestamp).toDate(),
+      issuedDate: data['issuedDate'] != null 
+          ? (data['issuedDate'] as Timestamp).toDate() 
+          : null,
       notes: data['notes'],
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
-      'type': type.toString(),
-      'level': level,
-      'certNumber': certNumber,
-      'expiryDate': Timestamp.fromDate(expiryDate),
-      'issuedDate': Timestamp.fromDate(issuedDate),
+      'typeId': typeId,
+      'typeName': typeName,
+      'expiresAt': Timestamp.fromDate(expiresAt),
+      'issuedDate': issuedDate != null ? Timestamp.fromDate(issuedDate!) : null,
       'notes': notes,
+      'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
-  CertificationStatus getStatus() {
+  /// Get certification status based on expiration date
+  /// - Expired: expiresAt < today
+  /// - Expiring Soon: expiresAt within 60 days
+  /// - Valid: otherwise
+  CertificationStatus getStatus({int expiringDaysThreshold = 60}) {
     final now = DateTime.now();
-    final difference = expiryDate.difference(now).inDays;
+    final difference = expiresAt.difference(now).inDays;
     
-    if (expiryDate.isBefore(now)) {
+    if (expiresAt.isBefore(now)) {
       return CertificationStatus.expired;
-    } else if (difference <= 90) {
+    } else if (difference <= expiringDaysThreshold) {
       return CertificationStatus.expiringSoon;
     } else {
-      return CertificationStatus.active;
+      return CertificationStatus.valid;
     }
   }
 
-  String getTypeDisplayName() {
-    switch (type) {
-      case CertificationType.asntLevelI:
-        return 'ASNT Level I';
-      case CertificationType.asntLevelII:
-        return 'ASNT Level II';
-      case CertificationType.asntLevelIII:
-        return 'ASNT Level III';
-      case CertificationType.sntTc1a:
-        return 'SNT-TC-1A';
-      case CertificationType.nas410:
-        return 'NAS-410';
-      case CertificationType.api570:
-        return 'API 570';
-      case CertificationType.api510:
-        return 'API 510';
-      case CertificationType.api653:
-        return 'API 653';
-      case CertificationType.awsCwi:
-        return 'AWS CWI (Certified Welding Inspector)';
-      case CertificationType.cswip:
-        return 'CSWIP';
-      case CertificationType.cgsbMtLevelI:
-        return 'CGSB MT Level I';
-      case CertificationType.cgsbMtLevelII:
-        return 'CGSB MT Level II';
-      case CertificationType.cgsbUtLevelI:
-        return 'CGSB UT Level I';
-      case CertificationType.cgsbUtLevelII:
-        return 'CGSB UT Level II';
-      case CertificationType.cgsbPautLevelI:
-        return 'CGSB PAUT Level I';
-      case CertificationType.cgsbPautLevelII:
-        return 'CGSB PAUT Level II';
-    }
+  /// Get days remaining until expiration (negative if expired)
+  int getDaysRemaining() {
+    final now = DateTime.now();
+    return expiresAt.difference(now).inDays;
   }
 
   Certification copyWith({
     String? id,
     String? userId,
-    CertificationType? type,
-    String? level,
-    String? certNumber,
-    DateTime? expiryDate,
+    String? typeId,
+    String? typeName,
+    DateTime? expiresAt,
     DateTime? issuedDate,
     String? notes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Certification(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      type: type ?? this.type,
-      level: level ?? this.level,
-      certNumber: certNumber ?? this.certNumber,
-      expiryDate: expiryDate ?? this.expiryDate,
+      typeId: typeId ?? this.typeId,
+      typeName: typeName ?? this.typeName,
+      expiresAt: expiresAt ?? this.expiresAt,
       issuedDate: issuedDate ?? this.issuedDate,
       notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+}
+
+/// Certification Type model - represents available certification types
+/// Managed globally (admin-curated list)
+class CertificationType {
+  final String id;
+  final String name;
+  final String? category;
+  final bool isActive;
+  final DateTime? createdAt;
+
+  CertificationType({
+    required this.id,
+    required this.name,
+    this.category,
+    this.isActive = true,
+    this.createdAt,
+  });
+
+  factory CertificationType.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return CertificationType(
+      id: doc.id,
+      name: data['name'] ?? '',
+      category: data['category'],
+      isActive: data['isActive'] ?? true,
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name,
+      'category': category,
+      'isActive': isActive,
+      'createdAt': createdAt != null 
+          ? Timestamp.fromDate(createdAt!) 
+          : FieldValue.serverTimestamp(),
+    };
   }
 }

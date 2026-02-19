@@ -136,18 +136,10 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
-                  'Defect AI Analyzer',
+                  'AI Defect Analyzer',
                   Icons.analytics_outlined,
                   Icons.analytics,
                   12,
-                  isLargeScreen,
-                ),
-                _buildMenuItem(
-                  context,
-                  'Defect AI Identifier',
-                  Icons.photo_camera_outlined,
-                  Icons.photo_camera,
-                  13,
                   isLargeScreen,
                 ),
                 

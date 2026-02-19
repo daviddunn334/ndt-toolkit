@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/defect_service.dart';
 import '../services/defect_type_service.dart';
-import 'log_defect_screen.dart';
+import 'unified_defect_analyzer_screen.dart';
 import 'defect_history_screen.dart';
 
 class DefectAnalyzerScreen extends StatefulWidget {
@@ -196,8 +196,8 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
             _buildActionButton(
               context,
               icon: Icons.add_circle_outline,
-              title: 'Log New Defect',
-              subtitle: 'Record a new defect with measurements',
+              title: 'Analyze New Defect',
+              subtitle: 'Add photos and record defect details',
               color: const Color(0xFF6C5BFF),
               onTap: _aiToolsDisabled
                   ? _showDisabledSnackBar
@@ -205,7 +205,7 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LogDefectScreen(),
+                          builder: (context) => const UnifiedDefectAnalyzerScreen(),
                         ),
                       );
                       if (result == true) {
@@ -275,10 +275,10 @@ class _DefectAnalyzerScreenState extends State<DefectAnalyzerScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoItem('Log defect type and measurements (inches)'),
-                  _buildInfoItem('Add optional notes for context'),
-                  _buildInfoItem('Review your defect history anytime'),
-                  _buildInfoItem('AI analysis coming in future updates'),
+                  _buildInfoItem('Take photos or upload from gallery (optional)'),
+                  _buildInfoItem('Enter defect measurements in inches'),
+                  _buildInfoItem('Select severity rating (for AI training data)'),
+                  _buildInfoItem('Review complete history with photos'),
                 ],
               ),
             ),

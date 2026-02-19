@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/coordinates_logger_screen.dart';
+import '../screens/weld_scan_plan_builder_screen.dart';
 
 class FieldProductivityCategoryScreen extends StatelessWidget {
   const FieldProductivityCategoryScreen({super.key});
@@ -83,6 +84,23 @@ class FieldProductivityCategoryScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const CoordinatesLoggerScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              _buildToolCard(
+                context,
+                title: '📐 Weld Scan Plan Builder',
+                description: 'Estimate scan time and plan coverage for UT/PAUT weld scans. Calculate passes, coverage overlap, and time estimates.',
+                tags: ['UT', 'PAUT', 'Planning'],
+                color: _accentPrimary,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WeldScanPlanBuilderScreen(),
                     ),
                   );
                 },

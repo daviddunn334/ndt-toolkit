@@ -39,19 +39,20 @@ function showInstallBanner() {
   banner.id = 'pwa-install-banner';
   banner.style.cssText = `
     position: fixed;
-    bottom: 20px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, #1b325b 0%, #2a4a7f 100%);
-    color: white;
-    padding: 16px 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: #2A313B;
+    color: #EDF9FF;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     z-index: 10000;
     max-width: 90%;
-    width: 400px;
+    width: 480px;
     font-family: 'Noto Sans', sans-serif;
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   `;
 
   banner.innerHTML = `
@@ -68,41 +69,63 @@ function showInstallBanner() {
       }
       #pwa-install-banner button {
         border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
+        padding: 12px 24px;
+        border-radius: 12px;
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         font-family: 'Noto Sans', sans-serif;
       }
       #pwa-install-banner button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transform: translateY(-1px);
       }
       #pwa-install-banner .install-btn {
-        background: #fbcd0f;
-        color: #1b325b;
-        margin-right: 8px;
+        background: #6C5BFF;
+        color: white;
+        margin-right: 10px;
+        box-shadow: 0 4px 12px rgba(108, 91, 255, 0.3);
+      }
+      #pwa-install-banner .install-btn:hover {
+        background: #5a4fcf;
+        box-shadow: 0 6px 16px rgba(108, 91, 255, 0.4);
       }
       #pwa-install-banner .dismiss-btn {
         background: transparent;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #AEBBC8;
+        border: 1.5px solid rgba(108, 91, 255, 0.3);
+      }
+      #pwa-install-banner .dismiss-btn:hover {
+        background: rgba(108, 91, 255, 0.08);
+        border-color: rgba(108, 91, 255, 0.5);
+      }
+      #pwa-install-banner .icon-container {
+        background: rgba(108, 91, 255, 0.15);
+        border-radius: 12px;
+        padding: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
     </style>
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div style="flex: 1;">
-        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">
-          📱 Install Integrity Tools
-        </div>
-        <div style="font-size: 13px; opacity: 0.9;">
-          Fast access, offline support, native experience
-        </div>
+    <div style="display: flex; align-items: flex-start; gap: 18px;">
+      <div class="icon-container">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6C5BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
       </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="install-btn" id="pwa-install-btn">Install</button>
-        <button class="dismiss-btn" id="pwa-dismiss-btn">Not now</button>
+      <div style="flex: 1;">
+        <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #EDF9FF; letter-spacing: -0.2px;">
+          Install App
+        </div>
+        <div style="font-size: 14px; color: #AEBBC8; line-height: 1.5; margin-bottom: 18px;">
+          Get faster access, offline support, and a native app experience
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="install-btn" id="pwa-install-btn">Install Now</button>
+          <button class="dismiss-btn" id="pwa-dismiss-btn">Maybe Later</button>
+        </div>
       </div>
     </div>
   `;

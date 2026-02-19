@@ -9,7 +9,7 @@ class MobileInstallDialog extends StatefulWidget {
   @override
   State<MobileInstallDialog> createState() => _MobileInstallDialogState();
 
-  /// Show the dialog if on mobile and not already installed/dismissed
+  /// Show the dialog - for mobile button clicks or desktop auto-show
   static void showIfNeeded(BuildContext context) {
     if (!kIsWeb) return;
 
@@ -21,18 +21,13 @@ class MobileInstallDialog extends StatefulWidget {
     final isStandalone = _matchesMedia('(display-mode: standalone)');
     if (isStandalone) return;
 
-    // Check if on mobile
-    if (_isMobile()) {
-      // Show after a short delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            builder: (context) => const MobileInstallDialog(),
-          );
-        }
-      });
+    // Show dialog immediately (called from button on mobile or auto on desktop)
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => const MobileInstallDialog(),
+      );
     }
   }
 

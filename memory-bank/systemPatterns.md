@@ -1,5 +1,29 @@
 # System Patterns: NDT-ToolKit
 
+## 🚨 CRITICAL REMINDERS
+
+### Documentation
+**📚 ALWAYS REVIEW DOCUMENTATION FIRST**
+- All project documentation is in `documentation/` folder
+- Start with `documentation/README.md` for complete structure
+- Review relevant sections before making changes
+- Documentation structure (updated February 19, 2026):
+  - `setup/` - Firebase, Domain, GitHub Actions setup
+  - `guides/` - Build configuration, app icons
+  - `features/` - AI, PWA, offline, NDT tools
+  - `troubleshooting/` - Android build fixes
+  - `changelog/` - Feature history
+- Root directory has `DOCUMENTATION_GUIDE.md` pointing to docs
+
+### Git Workflow
+**⚠️ NEVER COMMIT OR PUSH WITHOUT USER APPROVAL**
+- Do NOT run `git add`, `git commit`, or `git push` automatically
+- ALWAYS wait for explicit user instruction before committing
+- User must review changes and test before any commits
+- Let user handle all git operations themselves
+
+---
+
 ## Architecture Overview
 
 ### High-Level Architecture

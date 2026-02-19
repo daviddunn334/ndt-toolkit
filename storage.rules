@@ -26,10 +26,10 @@ service firebase.storage {
       allow read: if request.auth != null;
     }
     
-    // Allow authenticated users to read and write PDF procedures
-    // TODO: Restrict write access to admins only in production
-    match /procedures/{allPaths=**} {
-      allow read, write, delete: if request.auth != null;
+    // Each user can only read/write their own procedure files
+    // Path: procedures/{userId}/{company}/{filename}
+    match /procedures/{userId}/{allPaths=**} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
